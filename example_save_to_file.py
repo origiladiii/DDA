@@ -83,25 +83,32 @@ def are_videos_duplicates(ref_video, check_video, hash_size=8, mse_threshold=100
     ref_duration = get_video_duration(ref_video)
     check_duration = get_video_duration(check_video)
 
-    # Only compare if one is not 50% longer than the other
     if ref_duration > 1.5 * check_duration or check_duration > 1.5 * ref_duration:
         return False
 
-    ref_frames = get_video_frames(ref_video, fps=10) if ref_duration <= check_duration else get_video_frames(
-        check_video, fps=10)
-    check_frames = get_video_frames(check_video, fps=16)
+    shorter_video, longer_video = (ref_video, check_video) if ref_duration <= check_duration else (check_video, ref_video)
 
-    # Handle errors in frame extraction
-    if ref_frames is None or check_frames is None:
-        print(f"Error processing one of the videos: {ref_video} or {check_video}. Skipping comparison.")
-        return False  # Skip comparison for these videos
+    shorter_video_frames = get_video_frames(shorter_video, fps=20)
+    longer_video_frames = get_video_frames(longer_video, fps=20)
 
-    for ref_frame in ref_frames:
-        for frame in check_frames:
-            if is_matching_frame(ref_frame, frame, hash_size, mse_threshold, hist_threshold):
-                return True
+    if shorter_video_frames is None or longer_video_frames is None:
+        print(f"Error processing one of the videos: {shorter_video} or {longer_video}. Skipping comparison.")
+        return False
 
-    return False
+    match_index = -1
+    for i, frame in enumerate(shorter_video_frames):
+        if any(is_matching_frame(frame, check_frame, hash_size, mse_threshold, hist_threshold) for check_frame in longer_video_frames):
+            match_index = i
+            break
+
+    if match_index == -1:
+        return False
+
+    for ref_frame, check_frame in zip(shorter_video_frames[match_index:], longer_video_frames[match_index:]):
+        if not is_matching_frame(ref_frame, check_frame, hash_size, mse_threshold, hist_threshold):
+            return False
+
+    return True
 
 
 def get_video_duration(video_file):
