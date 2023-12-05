@@ -69,7 +69,9 @@ A progress bar is displayed throughout the process to indicate the progress of t
 # Conclusion
 This script is a comprehensive solution for identifying and removing duplicate media files in a given directory. It efficiently processes large sets of media files by leveraging advanced image processing techniques and parallel computing, ensuring a thorough and speedy execution. The usage of perceptual hashing, histogram comparison, and MSE calculations provides a robust approach to identifying duplicates, even when the files are not identical but visually similar.
 
-
+.
+.
+.
 
 # 2. example_no_save_to_file.py
 
